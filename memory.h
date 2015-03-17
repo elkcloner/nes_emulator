@@ -11,6 +11,8 @@ int mem_write(uint16_t, uint8_t);
 uint8_t mem_read_ppu(uint16_t);
 int mem_write_ppu(uint16_t, uint8_t);
 
-int mem_init(char *);
+int mem_init();
+
+int load_rom(char *);
 
 #endif

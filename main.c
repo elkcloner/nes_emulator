@@ -9,18 +9,19 @@ int main(int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 
-	cpu_init();
-	opcodes_init();
-	mem_init(argv[1]);
+	load_rom(argv[1]);
+	cpu_reset();
 
-	/*while (1) {
+	int i;
+	/*for (i = 0; i < 0x100; i++)
+		printf("%02x ", mem_read(0x8000+i));
+*/
+
+	while (1) {
 		print_registers();
-		print_memory();
+		//print_memory();
 		getc(stdin);
 	
 		cpu_exec();
-	}*/
-
-	opcodes_clean();	
-	exit(EXIT_SUCCESS);
+	}
 }

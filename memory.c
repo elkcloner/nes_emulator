@@ -1,13 +1,16 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "memory.h"
 
 #define PRG_ROM_SIZE	0x4000
 #define VROM_SIZE	0x2000
 #define NES_HEADER_SIZE	0x10
+#define MAX_ROM_SIZE	0x100000
 
 static uint8_t memory[MEM_SIZE];
 static uint8_t memoryPPU[MEM_SIZE];
+static uint8_t romImage[MAX_ROM_SIZE];
 
 uint8_t mem_read(uint16_t addr) {
 	//TODO
@@ -33,16 +36,10 @@ int mem_write_ppu(uint16_t addr, uint8_t value) {
 	return 0;
 }
 
-int mem_init(char *filename) {
+int mem_init() {
 	//TODO
-	FILE *fp;
 	uint8_t header[NES_HEADER_SIZE];
 	int i;
-
-	if ((fp = fopen(filename, "r")) == NULL) {
-		fprintf(stderr, "Failed to open input file %s\n", filename);
-		exit(EXIT_FAILURE);
-	}
 
 	for (i = 0; i < MEM_SIZE; i++) {
 		memory[i] = 0;
@@ -50,13 +47,27 @@ int mem_init(char *filename) {
 	}
 
 	// Read header
-	fread(header, 1, NES_HEADER_SIZE, fp);
+	memcpy(header, romImage, NES_HEADER_SIZE);
 	// Read first PRG-ROM bank into memory
-	fread(memory + 0x8000, 1, PRG_ROM_SIZE, fp);
+	memcpy(memory+0x8000, romImage + NES_HEADER_SIZE, PRG_ROM_SIZE);
 	// Read second PRG-ROM bank into memory
-	fread(memory + 0xc000, 1, PRG_ROM_SIZE, fp);
+	memcpy(memory+0xc000, romImage + NES_HEADER_SIZE + PRG_ROM_SIZE,
+		PRG_ROM_SIZE);
 	// Read VROM bank into PPU memory
-	fread(memoryPPU, 1, VROM_SIZE, fp);
+	memcpy(memoryPPU, romImage + NES_HEADER_SIZE + PRG_ROM_SIZE*2, VROM_SIZE);
 
 	return 0;
+}
+
+int load_rom(char *filename) {
+	FILE *fp;
+
+	if ((fp = fopen(filename, "r")) == NULL) {
+		fprintf(stderr, "Failed to open input file %s\n", filename);
+		exit(EXIT_FAILURE);
+	}
+
+	fread(romImage, 1, MAX_ROM_SIZE, fp);
+
+	fclose(fp);
 }

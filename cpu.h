@@ -6,6 +6,8 @@
 
 int cpu_exec();
 
+int cpu_reset();
+
 int cpu_init();
 int opcodes_init();
 int opcodes_clean();

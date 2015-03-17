@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "cpu.h"
 #include "instructions.h"
+#include "memory.h"
 
 #define NUM_OPCODES	0x100
 
@@ -101,8 +102,16 @@ int cpu_exec() {
 	return 0;
 }
 
+int cpu_reset() {
+	opcodes_init();
+	mem_init();
+	cpu_init();
+}
+
 int cpu_init() {
-	state.pc = 0;
+	state.pc = mem_read(0xfffd);
+	state.pc <<= 8;
+	state.pc |= mem_read(0xfffc);
 	state.sp = 0xff;
 	state.a = 0;
 	state.x = 0;
