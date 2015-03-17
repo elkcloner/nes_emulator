@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #define MEM_SIZE	0x10000
+#define MEM_SIZE_PPU	0x4000
 
 uint8_t mem_read(uint16_t);
 int mem_write(uint16_t, uint8_t);
