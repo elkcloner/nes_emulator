@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <stdio.h>
 #include "cpu.h"
 #include "instructions.h"
 #include "cpu_memory.h"
@@ -32,6 +31,7 @@ int cpu_exec() {
 	//TODO
 	uint8_t code;
 	uint16_t addr;
+	uint16_t temp;
 	
 	// Fetch opcode
 	code = mem_read_cpu(state.pc);
@@ -58,10 +58,10 @@ int cpu_exec() {
 		case ZERO_PAGE:
 			break;
 		case ZERO_PAGE_X:
-			addr = (addr + state.x) & 0xff;
+			addr = ((uint8_t) addr + state.x) & 0xff;
 			break;
 		case ZERO_PAGE_Y:
-			addr = (addr + state.y) & 0xff;
+			addr = ((uint8_t) addr + state.y) & 0xff;
 			break;
 		case ABSOLUTE:
 			break;
@@ -72,18 +72,22 @@ int cpu_exec() {
 			addr = addr + state.y;
 			break;
 		case INDIRECT:
-			addr = mem_read_cpu(addr);
+			temp = mem_read_cpu((0xff00 & addr) | ((uint8_t) (addr + 1)));
+			temp <<= 8;
+			temp |= mem_read_cpu(addr);
+			addr = temp;
 			break;
 		case INDIRECT_X:
-			addr = mem_read_cpu(addr + state.x + 1);
-			addr <<= 8;
-			addr |= mem_read_cpu(addr + state.x);
+			temp = mem_read_cpu((uint8_t) (addr + state.x + 1));
+			temp <<= 8;
+			temp |= mem_read_cpu((uint8_t) (addr + state.x));
+			addr = temp;
 			break;
 		case INDIRECT_Y:
-			addr = mem_read_cpu(addr + 1);
-			addr <<= 8;
-			addr |= mem_read_cpu(addr);
-			addr = addr + state.y;
+			temp = mem_read_cpu((0xff00 & addr) | ((uint8_t) (addr + 1)));
+			temp <<= 8;
+			temp |= mem_read_cpu(addr);
+			addr = temp + state.y;
 			break;
 		case IMPLIED:
 			break;
@@ -124,6 +128,7 @@ int cpu_init() {
 
 int opcodes_init() {
 	int i;
+	uint8_t temp;
 
 	for (i = 0; i < NUM_OPCODES; i++) {
 		switch(i) {
@@ -765,7 +770,7 @@ int opcodes_init() {
 				break;
 			case 0xb6:
 				opcodeTable[0xb6] = (Opcode *) malloc(sizeof(Opcode));
-				opcodeTable[0xb6]->mode = ZERO_PAGE_X;
+				opcodeTable[0xb6]->mode = ZERO_PAGE_Y;
 				opcodeTable[0xb6]->length = 2;
 				opcodeTable[0xb6]->func = &asm_ldx;
 				break;
@@ -801,7 +806,7 @@ int opcodes_init() {
 				break;
 			case 0xbe:
 				opcodeTable[0xbe] = (Opcode *) malloc(sizeof(Opcode));
-				opcodeTable[0xbe]->mode = ABSOLUTE_X;
+				opcodeTable[0xbe]->mode = ABSOLUTE_Y;
 				opcodeTable[0xbe]->length = 3;
 				opcodeTable[0xbe]->func = &asm_ldx;
 				break;
@@ -1034,7 +1039,35 @@ int opcodes_init() {
 				opcodeTable[0xfe]->func = &asm_inc;
 				break;
 			default:
-				opcodeTable[i] = NULL;
+				temp = i & 0xf;	
+				switch (temp) {
+					case 0xa:
+						// one byte
+						opcodeTable[i] = (Opcode *) malloc(sizeof(Opcode));
+						opcodeTable[i]->mode = IMPLIED;
+						opcodeTable[i]->length = 1;
+						opcodeTable[i]->func = &asm_nop;
+						break;
+					case 0x0:
+					case 0x2:
+					case 0x4:
+					case 0x9:
+						// two bytes
+						opcodeTable[i] = (Opcode *) malloc(sizeof(Opcode));
+						opcodeTable[i]->mode = IMMEDIATE;
+						opcodeTable[i]->length = 2;
+						opcodeTable[i]->func = &asm_nop;
+						break;
+					case 0xc:
+						// three bytes	
+						opcodeTable[i] = (Opcode *) malloc(sizeof(Opcode));
+						opcodeTable[i]->mode = ABSOLUTE;
+						opcodeTable[i]->length = 3;
+						opcodeTable[i]->func = &asm_nop;
+						break;
+					default:
+						opcodeTable[i] = NULL;
+				}
 		}
 	}
 
@@ -1072,7 +1105,7 @@ uint8_t get_y() {
 }
 
 uint8_t get_status() {
-	return state.status;
+	return (0xef & state.status) | 0x20;
 }
 
 int set_pc(uint16_t value) {

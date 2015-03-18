@@ -15,10 +15,17 @@ int main(int argc, char **argv) {
 	load_rom(argv[1]);
 	cpu_reset();
 
-	while (1) {
-		print_registers();
+	// values for testing
+	// remember to revert loader
+	set_pc(0xc000);
+	set_sp(0xfd);
+	set_status(0x24);
+
+	int i;
+	for (i = 0; i < 8991; i++) {
+		print_debug();
 		//print_memory();
-		getc(stdin);
+		//getc(stdin);
 	
 		cpu_exec();
 	}

@@ -177,13 +177,13 @@ int asm_brk(uint16_t addr) {
 	uint8_t pcLow = pc;
 
 	// Push PC
+	set_sp(get_sp()-1);
 	mem_write_cpu((0x100 | (uint16_t) get_sp()), pcHigh);
 	set_sp(get_sp()-1);
 	mem_write_cpu((0x100 | (uint16_t) get_sp()), pcLow);
-	set_sp(get_sp()-1);
 	// Push status
-	mem_write_cpu((0x100 | (uint16_t) get_sp()), get_status());
 	set_sp(get_sp()-1);
+	mem_write_cpu((0x100 | (uint16_t) get_sp()), get_status());
 
 	set_iFlag();
 
@@ -362,10 +362,10 @@ int asm_jsr(uint16_t addr) {
 	uint8_t pcHigh = pc >> 8;
 	uint8_t pcLow = pc;
 
+	set_sp(get_sp()-1);
 	mem_write_cpu((0x100 | (uint16_t) get_sp()), pcHigh);
 	set_sp(get_sp()-1);
 	mem_write_cpu((0x100 | (uint16_t) get_sp()), pcLow);
-	set_sp(get_sp()-1);
 
 	set_pc(addr);
 
@@ -424,11 +424,6 @@ int asm_lsr(uint16_t addr) {
 	uint8_t value = mem_read_cpu(addr);
 	mem_write_cpu(addr, value >> 1);
 
-	if (0x80 & mem_read_cpu(addr))
-		set_nFlag();
-	else
-		clr_nFlag();
-
 	if (!mem_read_cpu(addr))
 		set_zFlag();
 	else
@@ -445,11 +440,6 @@ int asm_lsr(uint16_t addr) {
 int asm_lsra(uint16_t addr) {
 	uint8_t value = get_a();
 	set_a(value >> 1);
-
-	if (0x80 & get_a(addr))
-		set_nFlag();
-	else
-		clr_nFlag();
 
 	if (!get_a())
 		set_zFlag();
@@ -704,13 +694,13 @@ int asm_rti(uint16_t addr) {
 	uint16_t pcHigh, pcLow;
 
 	// Pull status
-	set_sp(get_sp()+1);
 	set_status(mem_read_cpu(0x100 | (uint16_t) get_sp()));
-	// Pull PC
 	set_sp(get_sp()+1);
+	// Pull PC
 	pcLow = mem_read_cpu(0x100 | (uint16_t) get_sp());
 	set_sp(get_sp()+1);
 	pcHigh = mem_read_cpu(0x100 | (uint16_t) get_sp());
+	set_sp(get_sp()+1);
 	set_pc((pcHigh << 8) | pcLow);
 
 	return 0;
@@ -719,10 +709,10 @@ int asm_rti(uint16_t addr) {
 int asm_rts(uint16_t addr) {
 	uint16_t pcHigh, pcLow;
 
-	set_sp(get_sp()+1);
 	pcLow = mem_read_cpu(0x100 | (uint16_t) get_sp());
 	set_sp(get_sp()+1);
 	pcHigh = mem_read_cpu(0x100 | (uint16_t) get_sp());
+	set_sp(get_sp()+1);
 
 	set_pc((pcHigh << 8) | pcLow);
 	set_pc(get_pc()+1);
@@ -800,15 +790,15 @@ int asm_tsx(uint16_t addr) {
 }
 
 int asm_pha(uint16_t addr) {
-	mem_write_cpu((0x100 | (uint16_t) get_sp()), get_a());
 	set_sp(get_sp()-1);
+	mem_write_cpu((0x100 | (uint16_t) get_sp()), get_a());
 
 	return 0;
 }
 
 int asm_pla(uint16_t addr) {
-	set_sp(get_sp()+1);
 	set_a(mem_read_cpu(0x100 | (uint16_t) get_sp()));
+	set_sp(get_sp()+1);
 
 	if (0x80 & get_a())
 		set_nFlag();
@@ -824,15 +814,15 @@ int asm_pla(uint16_t addr) {
 }
 
 int asm_php(uint16_t addr) {
-	mem_write_cpu((0x100 | (uint16_t) get_sp()), 0x10 | get_status());
 	set_sp(get_sp()-1);
+	mem_write_cpu((0x100 | (uint16_t) get_sp()), 0x10 | get_status());
 
 	return 0;
 }
 
 int asm_plp(uint16_t addr) {
-	set_sp(get_sp()+1);
 	set_status(mem_read_cpu(0x100 | (uint16_t) get_sp()));
+	set_sp(get_sp()+1);
 
 	return 0;
 }
