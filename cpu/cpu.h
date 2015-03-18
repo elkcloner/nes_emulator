@@ -4,9 +4,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+typedef enum {RESET, IRQ, NMI} Interrupt;
+
 int cpu_exec();
 
-int cpu_reset();
+int cpu_interrupt(Interrupt);
 
 int cpu_init();
 int opcodes_init();
@@ -49,5 +51,7 @@ int clr_dFlag();
 int clr_iFlag();
 int clr_zFlag();
 int clr_cFlag();
+
+int clr_isr();
 
 #endif

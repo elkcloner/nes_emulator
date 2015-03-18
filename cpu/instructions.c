@@ -187,7 +187,7 @@ int asm_brk(uint16_t addr) {
 
 	set_iFlag();
 
-	//TODO
+	cpu_interrupt(IRQ);
 
 	return 0;
 }
@@ -712,6 +712,9 @@ int asm_rti(uint16_t addr) {
 	set_sp(get_sp()+1);
 	pcHigh = mem_read_cpu(0x100 | (uint16_t) get_sp());
 	set_pc((pcHigh << 8) | pcLow);
+
+	// Clear isr flag
+	clr_isr();
 
 	return 0;
 }
