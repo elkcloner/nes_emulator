@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "cpu.h"
 #include "instructions.h"
-#include "memory.h"
+#include "cpu_memory.h"
 
 #define NUM_OPCODES	0x100
 
@@ -34,7 +34,7 @@ int cpu_exec() {
 	uint16_t addr;
 	
 	// Fetch opcode
-	code = mem_read(state.pc);
+	code = mem_read_cpu(state.pc);
 
 	// Get arg based on instruction length and mode
 	switch (opcodeTable[code]->length) {
@@ -42,12 +42,12 @@ int cpu_exec() {
 			addr = 0;
 			break;
 		case 2:
-			addr = mem_read(state.pc + 1);
+			addr = mem_read_cpu(state.pc + 1);
 			break;
 		case 3:
-			addr = mem_read(state.pc + 2);
+			addr = mem_read_cpu(state.pc + 2);
 			addr <<= 8;
-			addr |= mem_read(state.pc + 1);
+			addr |= mem_read_cpu(state.pc + 1);
 			break;
 	}
 
@@ -58,10 +58,10 @@ int cpu_exec() {
 		case ZERO_PAGE:
 			break;
 		case ZERO_PAGE_X:
-			addr = addr + state.x & 0xff;
+			addr = (addr + state.x) & 0xff;
 			break;
 		case ZERO_PAGE_Y:
-			addr = addr + state.y & 0xff;
+			addr = (addr + state.y) & 0xff;
 			break;
 		case ABSOLUTE:
 			break;
@@ -72,17 +72,17 @@ int cpu_exec() {
 			addr = addr + state.y;
 			break;
 		case INDIRECT:
-			addr = mem_read(addr);
+			addr = mem_read_cpu(addr);
 			break;
 		case INDIRECT_X:
-			addr = mem_read(addr + state.x + 1);
+			addr = mem_read_cpu(addr + state.x + 1);
 			addr <<= 8;
-			addr |= mem_read(addr + state.x);
+			addr |= mem_read_cpu(addr + state.x);
 			break;
 		case INDIRECT_Y:
-			addr = mem_read(addr + 1);
+			addr = mem_read_cpu(addr + 1);
 			addr <<= 8;
-			addr |= mem_read(addr);
+			addr |= mem_read_cpu(addr);
 			addr = addr + state.y;
 			break;
 		case IMPLIED:
@@ -104,14 +104,15 @@ int cpu_exec() {
 
 int cpu_reset() {
 	opcodes_init();
-	mem_init();
 	cpu_init();
+
+	return 0;
 }
 
 int cpu_init() {
-	state.pc = mem_read(0xfffd);
+	state.pc = mem_read_cpu(0xfffd);
 	state.pc <<= 8;
-	state.pc |= mem_read(0xfffc);
+	state.pc |= mem_read_cpu(0xfffc);
 	state.sp = 0xff;
 	state.a = 0;
 	state.x = 0;
@@ -1036,6 +1037,8 @@ int opcodes_init() {
 				opcodeTable[i] = NULL;
 		}
 	}
+
+	return 0;
 }
 
 int opcodes_clean() {

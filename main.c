@@ -1,7 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "cpu.h"
-#include "memory.h"
+#include "cpu/cpu.h"
+#include "cpu/cpu_memory.h"
+#include "ppu/ppu_memory.h"
+#include "misc/loader.h"
+#include "misc/debug.h"
 
 int main(int argc, char **argv) {
 	if (argc < 2) {
@@ -12,11 +15,6 @@ int main(int argc, char **argv) {
 	load_rom(argv[1]);
 	cpu_reset();
 
-	int i;
-	/*for (i = 0; i < 0x100; i++)
-		printf("%02x ", mem_read(0x8000+i));
-*/
-
 	while (1) {
 		print_registers();
 		//print_memory();
@@ -24,4 +22,7 @@ int main(int argc, char **argv) {
 	
 		cpu_exec();
 	}
+
+
+	exit(EXIT_SUCCESS);
 }
