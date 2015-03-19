@@ -26,6 +26,8 @@ static uint8_t ppuScrollY = 0x00;
 static uint16_t ppuAddrLatch = 0x0000;
 static uint8_t scrollLatchStatus = 0;
 static uint8_t addrLatchStatus = 0;
+// TODO this is an ugly fix
+static uint8_t hasRead = 0;
 
 int ppu_run(int cycles) {
 	int counter = cycles*3;
@@ -34,18 +36,22 @@ int ppu_run(int cycles) {
 		if (scanCycle > 340) {
 			scanCycle = 0;
 			scanLine++;
-			if (scanLine > 261)
+			if (scanLine > 261) {
 				scanLine = 0;
+			}
 		}	
 
 		// 1,241 Set vBlank and send interrup
 		if ((scanLine == 241) && (scanCycle == 1)) {
-			cpu_interrupt(NMI);
+			if (registers.controller & 0x80)
+				cpu_interrupt(NMI);
 			set_vBlank();
+			hasRead = 0;
 		}
 
 		// 1,261 clear PPUSTATUS bit 7
-		registers.status &= ~0x80;
+		if ((scanLine == 261) && (scanCycle == 1))
+			clr_vBlank();
 
 		scanCycle++;
 		counter--;
@@ -65,7 +71,10 @@ int ppu_run(int cycles) {
 			break;
 		case READ_2002:
 			// clear PPUSTATUS bit 7
-			registers.status &= ~0x80;
+			if (hasRead) {
+				registers.status &= ~0x80;
+			}
+			hasRead = 1;
 			// clear address latch for scroll and addr
 			ppuScrollX = 0x00;
 			ppuScrollY = 0x00;

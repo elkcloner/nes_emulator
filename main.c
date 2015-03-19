@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
 
 	load_rom(argv[1]);
 
-/*	for (cycleCount = 0x8000; cycleCount < 0x10000; cycleCount++)
+/*	for (cycleCount = 0xc000; cycleCount < 0x10000; cycleCount++)
 		printf("%02x ", mem_read_cpu(cycleCount));
 */
 
@@ -31,7 +31,6 @@ int main(int argc, char **argv) {
 		cycleCount = 0;
 
 		while ((cycleCount < CYCLES_PER_FRAME) && (get_ppu_changed() == NONE)) {
-			print_debug();
 			cycleCount +=  cpu_exec();
 		}
 
