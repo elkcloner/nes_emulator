@@ -2,11 +2,16 @@
 #include <stdio.h>
 #include "cpu/cpu.h"
 #include "cpu/cpu_memory.h"
+#include "ppu/ppu.h"
 #include "ppu/ppu_memory.h"
 #include "misc/loader.h"
 #include "misc/debug.h"
 
+#define CYCLES_PER_FRAME	29871
+
 int main(int argc, char **argv) {
+	int cycleCount;	
+
 	if (argc < 2) {
 		fprintf(stderr, "Usage: %s filename\n", argv[0]);
 		exit(EXIT_FAILURE);
@@ -18,10 +23,8 @@ int main(int argc, char **argv) {
 	cpu_interrupt(RESET);
 
 	while (1) {
-		print_debug();
-		getc(stdin);
-	
-		cpu_exec();
+		cycleCount =  cpu_run(CYCLES_PER_FRAME);
+		ppu_run(cycleCount);
 	}
 
 

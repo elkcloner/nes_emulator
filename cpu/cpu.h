@@ -6,6 +6,7 @@
 
 typedef enum {RESET, IRQ, NMI} Interrupt;
 
+int cpu_run(int);
 int cpu_exec();
 
 int cpu_interrupt(Interrupt);
