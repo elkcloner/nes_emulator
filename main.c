@@ -18,15 +18,26 @@ int main(int argc, char **argv) {
 	}
 
 	load_rom(argv[1]);
+
+/*	for (cycleCount = 0x8000; cycleCount < 0x10000; cycleCount++)
+		printf("%02x ", mem_read_cpu(cycleCount));
+*/
+
 	cpu_init();
 
 	cpu_interrupt(RESET);
 
 	while (1) {
-		cycleCount =  cpu_run(CYCLES_PER_FRAME);
+		cycleCount = 0;
+
+		while ((cycleCount < CYCLES_PER_FRAME) && (get_ppu_changed() == NONE)) {
+			print_debug();
+			cycleCount +=  cpu_exec();
+		}
+
+		printf("ppu entered\n");
 		ppu_run(cycleCount);
 	}
-
 
 	exit(EXIT_SUCCESS);
 }

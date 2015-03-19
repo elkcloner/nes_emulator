@@ -176,18 +176,20 @@ int asm_brk(uint16_t addr) {
 	uint8_t pcHigh = pc >> 8;
 	uint8_t pcLow = pc;
 
-	// Push PC
-	mem_write_cpu((0x100 | (uint16_t) get_sp()), pcHigh);
-	set_sp(get_sp()-1);
-	mem_write_cpu((0x100 | (uint16_t) get_sp()), pcLow);
-	set_sp(get_sp()-1);
-	// Push status
-	mem_write_cpu((0x100 | (uint16_t) get_sp()), get_status());
-	set_sp(get_sp()-1);
+	if (!get_iFlag()) {
+		// Push PC
+		mem_write_cpu((0x100 | (uint16_t) get_sp()), pcHigh);
+		set_sp(get_sp()-1);
+		mem_write_cpu((0x100 | (uint16_t) get_sp()), pcLow);
+		set_sp(get_sp()-1);
+		// Push status
+		mem_write_cpu((0x100 | (uint16_t) get_sp()), get_status());
+		set_sp(get_sp()-1);
 
-	set_iFlag();
+		set_iFlag();
 
-	cpu_interrupt(IRQ);
+		cpu_interrupt(IRQ);
+	}
 
 	return 0;
 }
@@ -712,9 +714,6 @@ int asm_rti(uint16_t addr) {
 	set_sp(get_sp()+1);
 	pcHigh = mem_read_cpu(0x100 | (uint16_t) get_sp());
 	set_pc((pcHigh << 8) | pcLow);
-
-	// Clear isr flag
-	clr_isr();
 
 	return 0;
 }

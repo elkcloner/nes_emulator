@@ -1,6 +1,9 @@
 #include "ppu_memory.h"
 
+#define SPRITE_MEM_SIZE	0xff
+
 static uint8_t memoryPPU[MEM_SIZE_PPU];
+static uint8_t memorySprite[SPRITE_MEM_SIZE];
 
 uint8_t mem_read_ppu(uint16_t addr) {
 	addr = addr % 0x4000;
@@ -9,7 +12,7 @@ uint8_t mem_read_ppu(uint16_t addr) {
 }
 
 int mem_write_ppu(uint16_t addr, uint8_t value) {
-	//TODO
+	//TODO pattern table mirroring and palette mirroring
 	addr = addr % 0x4000;
 
 	if (addr < 0x2000) {
@@ -34,4 +37,13 @@ int mem_write_ppu(uint16_t addr, uint8_t value) {
 	}
 	
 	return 0;
+}
+
+uint8_t read_sprite_mem(uint8_t addr) {
+	return memorySprite[addr];
+}
+
+int write_sprite_mem(uint8_t addr, uint8_t value) {
+	memorySprite[addr] = value;
+	return 0;	
 }
