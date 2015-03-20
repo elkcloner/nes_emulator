@@ -163,7 +163,7 @@ int cpu_exec() {
 	// Increment cycle count by instruction cycles
 	cycles += opcodeTable[code]->cycles;
 
-	print_debug();
+	//print_debug();
 
 	// Increment PC by instruction length
 	state.pc += opcodeTable[code]->length;
