@@ -4,8 +4,8 @@
 static SDL_Surface *screen = NULL;
 
 int display_frame(char *pixels) {
-	SDL_Surface *surface = SDL_CreateRGBSurfaceFrom((void *)pixels,
-		256, 240, 24, 256*3, 0x0000FF, 0x00FF00, 0xFF0000, 0);
+	SDL_Surface *surface = SDL_CreateRGBSurfaceFrom((void *)pixels + 256*3*8,
+		256, 224, 24, 256*3, 0x0000FF, 0x00FF00, 0xFF0000, 0);
 
 	SDL_BlitSurface(surface, NULL, screen, NULL);
 	SDL_Flip(screen);
@@ -26,7 +26,7 @@ int display_events() {
 
 int display_init() {
 	SDL_Init(SDL_INIT_EVERYTHING);
-	screen = SDL_SetVideoMode(256, 240, 24, SDL_SWSURFACE);
+	screen = SDL_SetVideoMode(256, 224, 24, SDL_SWSURFACE);
 	SDL_Flip(screen);
 
 	return 0;
