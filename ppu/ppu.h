@@ -3,6 +3,8 @@
 
 int ppu_run(int);
 
+int render_frame();
+
 int update_memory();
 
 int set_vBlank();

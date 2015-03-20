@@ -41,7 +41,11 @@ int ppu_run(int cycles) {
 			}
 		}	
 
-		// 1,241 Set vBlank and send interrup
+		// 0,240 render the entire frame based off NT0
+		if ((scanLine == 240) && (scanCycle == 1))
+			render_frame();
+
+		// 1,241 Set vBlank and send interrupt
 		if ((scanLine == 241) && (scanCycle == 1)) {
 			if (registers.controller & 0x80)
 				cpu_interrupt(NMI);
@@ -126,6 +130,89 @@ int ppu_run(int cycles) {
 	update_memory();
 	set_ppu_changed(NONE);
 
+	return 0;
+}
+
+int render_frame() {
+	ppuChange temp = get_ppu_changed();
+
+	uint8_t frame[256][256];
+	uint8_t patternLow, patternHigh;
+
+	uint16_t ptPointer;
+	uint8_t attributes;
+
+	int rowCount = 0;
+	int colCount = 0;
+	int i, j;
+
+	for (i = 0; i < 240; i++)
+		for (j = 0; j < 256; j++)
+			frame[i][j] = 0;
+
+	// Populate frame with bits from the pattern table
+	for (rowCount = 0; rowCount < 30; rowCount++) {
+		for (colCount = 0; colCount < 32; colCount++) {
+			// Get index into the pattern table
+			ptPointer = mem_read_ppu(rowCount*32 + colCount);
+			for (i = 0; i < 8; i++) {
+				patternLow = mem_read_ppu(0x2000 + ptPointer*16 + i);
+				patternHigh = mem_read_ppu(0x2000 + ptPointer*16 + 8 + i);
+
+				frame[rowCount*8+i][colCount*8+0] = (patternLow & 0x80) > 7;
+				frame[rowCount*8+i][colCount*8+0] = (patternLow & 0x40) > 6;
+				frame[rowCount*8+i][colCount*8+0] = (patternLow & 0x20) > 5;
+				frame[rowCount*8+i][colCount*8+0] = (patternLow & 0x10) > 4;
+				frame[rowCount*8+i][colCount*8+0] = (patternLow & 0x08) > 3;
+				frame[rowCount*8+i][colCount*8+0] = (patternLow & 0x04) > 2;
+				frame[rowCount*8+i][colCount*8+0] = (patternLow & 0x02) > 1;
+				frame[rowCount*8+i][colCount*8+0] = (patternLow & 0x01);
+				frame[rowCount*8+i][colCount*8+0] |= (patternHigh & 0x80) > 6;
+				frame[rowCount*8+i][colCount*8+0] |= (patternHigh & 0x40) > 5;
+				frame[rowCount*8+i][colCount*8+0] |= (patternHigh & 0x20) > 4;
+				frame[rowCount*8+i][colCount*8+0] |= (patternHigh & 0x10) > 3;
+				frame[rowCount*8+i][colCount*8+0] |= (patternHigh & 0x08) > 2;
+				frame[rowCount*8+i][colCount*8+0] |= (patternHigh & 0x04) > 1;
+				frame[rowCount*8+i][colCount*8+0] |= (patternHigh & 0x02);
+				frame[rowCount*8+i][colCount*8+0] |= (patternHigh & 0x01) < 1;
+			}
+		}
+	}
+
+	// Add bits from the attribute table to the frame
+	for (rowCount = 0; rowCount < 8; rowCount++) {
+		for (colCount = 0; colCount < 8; colCount++) {
+			attributes = mem_read_ppu(0x23c0 + rowCount*8 + colCount);	
+			for (i = 0; i < 32; i++) {
+				for (j = 0; j < 32; j++) {
+					if ((i < 16) && (j < 16)) {
+						// upper left tiles	
+						frame[rowCount*32+i][colCount*32+j] |= (attributes & 0x03) < 2;
+					} else if ((i < 16) && (j >= 16)) {
+						// upper right tiles
+						frame[rowCount*32+i][colCount*32+j] |= (attributes & 0x0c);
+					} else if ((i >= 16) && (j < 16)) {
+						// lower left tiles
+						frame[rowCount*32+i][colCount*32+j] |= (attributes & 0x30) > 2;
+					} else {
+						// lower right tiles
+						frame[rowCount*32+i][colCount*32+j] |= (attributes & 0xc0) > 4;
+					}
+				}
+			}
+		}
+
+	}
+
+	// load frame with values from palettes
+	for (rowCount = 0; rowCount < 240; rowCount++) {
+		for (colCount = 0; colCount < 256; colCount++) {
+			frame[rowCount][colCount] = mem_read_ppu(0x3f00 +
+				((uint16_t) frame[rowCount][colCount]));
+		}
+	}
+
+	set_ppu_changed(temp);
 	return 0;
 }
 
