@@ -7,11 +7,21 @@
 #define VROM_SIZE	0x2000
 #define NES_HEADER_SIZE	0x10
 
+static uint8_t mirroring;
+static uint8_t fourScreen;
+
 int load_rom(char *filename) {
+	// Currently NROM support only
 	FILE *fp;
 	uint32_t addr;
 	int i;
 	uint8_t buf;
+
+	uint8_t header[0x10];
+	uint8_t numPRG; //numCHR;
+	//uint8_t mirroring, fourScreen;
+	//uint8_t batterySram;
+	uint8_t trainer;
 
 	if ((fp = fopen(filename, "r")) == NULL) {
 		fprintf(stderr, "Failed to open input file %s\n", filename);
@@ -20,16 +30,35 @@ int load_rom(char *filename) {
 
 	// Read header
 	for (i = 0; i < NES_HEADER_SIZE; i++)
-		fscanf(fp, "%*c");
+		fscanf(fp, "%c", &(header[i]));
+
+	numPRG = header[4];
+	//numCHR = header[5];
+	mirroring = header[6] & 0x01;
+	fourScreen = header[6] & 0x08;
+	//batterySram = header[6] & 0x02;
+	trainer = header[6] & 0x04;
+
+	// Read trainer if present
+	if (trainer)
+		for (i = 0; i < 512; i++)
+			fscanf(fp, "%*c");
+
 	// Read first PRG-ROM bank into cpu memory
-/*	for (addr = 0x8000; addr < 0x8000 + PRG_ROM_SIZE; addr++) {
+	for (addr = 0x8000; addr < 0xc000; addr++) {
 		fscanf(fp, "%c", &buf);
 		mem_write_cpu(addr, buf);
-	}*/
+	}
 	// Read second PRG-ROM bank into cpu memory
-	for (addr = 0xc000; addr < 0xc000 + PRG_ROM_SIZE; addr++) {
-		fscanf(fp, "%c", &buf);
-		mem_write_cpu(addr, buf);
+	if (numPRG == 2) {
+		for (addr = 0xc000; addr < 0xffff; addr++) {
+			fscanf(fp, "%c", &buf);
+			mem_write_cpu(addr, buf);
+		}
+	} else {
+		for (addr = 0xc000; addr < 0xffff; addr++) {
+			mem_write_cpu(addr, mem_read_cpu(addr-0x4000));
+		}
 	}
 	// Read VROM bank into PPU memory
 	for (addr = 0; addr < VROM_SIZE; addr++) {
@@ -38,4 +67,12 @@ int load_rom(char *filename) {
 	}
 
 	return 0;
+}
+
+uint8_t get_mirroring() {
+	return mirroring;
+}
+
+uint8_t get_four_screen() {
+	return fourScreen;
 }

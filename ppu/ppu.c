@@ -150,12 +150,34 @@ int render_frame() {
 	uint8_t frame[256][256];
 	uint8_t patternLow, patternHigh;
 
+	uint16_t nameTable, patternTable;
+
 	uint16_t ptPointer;
 	uint16_t attributes;
 
 	int rowCount = 0;
 	int colCount = 0;
 	int i, j;
+
+	switch (registers.controller & 0x3) {
+		case 0:
+			nameTable = 0x2000;
+			break;
+		case 1:
+			nameTable = 0x2400;
+			break;
+		case 2:
+			nameTable = 0x2800;
+			break;
+		case 3:
+			nameTable = 0x2c00;
+			break;
+	}
+
+	if (registers.controller & 0x10)
+		patternTable = 0x1000;
+	else
+		patternTable = 0x0000;
 
 	for (i = 0; i < 240; i++)
 		for (j = 0; j < 256; j++)
@@ -165,10 +187,10 @@ int render_frame() {
 	for (rowCount = 0; rowCount < 30; rowCount++) {
 		for (colCount = 0; colCount < 32; colCount++) {
 			// Get index into the pattern table
-			ptPointer = mem_read_ppu(0x2000 + rowCount*32 + colCount);
+			ptPointer = mem_read_ppu(nameTable + rowCount*32 + colCount);
 			for (i = 0; i < 8; i++) {
-				patternLow = mem_read_ppu(0x1000 + ptPointer*16 + i);
-				patternHigh = mem_read_ppu(0x1000 + ptPointer*16 + 8 + i);
+				patternLow = mem_read_ppu(patternTable + ptPointer*16 + i);
+				patternHigh = mem_read_ppu(patternTable + ptPointer*16 + 8 + i);
 
 				frame[rowCount*8+i][colCount*8+0] = (patternLow & 0x80) >> 7;
 				frame[rowCount*8+i][colCount*8+1] = (patternLow & 0x40) >> 6;
@@ -193,7 +215,7 @@ int render_frame() {
 	// Add bits from the attribute table to the frame
 	for (rowCount = 0; rowCount < 8; rowCount++) {
 		for (colCount = 0; colCount < 8; colCount++) {
-			attributes = mem_read_ppu(0x23c0 + rowCount*8 + colCount);	
+			attributes = mem_read_ppu(nameTable + 0x3c0 + rowCount*8 + colCount);	
 			for (i = 0; i < 32; i++) {
 				for (j = 0; j < 32; j++) {
 					if ((i < 16) && (j < 16)) {

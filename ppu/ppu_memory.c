@@ -1,4 +1,5 @@
 #include "ppu_memory.h"
+#include "../misc/loader.h"
 
 #define SPRITE_MEM_SIZE	0xff
 
@@ -19,7 +20,7 @@ int mem_write_ppu(uint16_t addr, uint8_t value) {
 		// Pattern table
 		memoryPPU[addr] = value;
 	} else if (addr < 0x3f00) {
-		// Name table
+/*		// Name table
 		if ((0x3000 <= addr) && (addr < 0x3f00))
 			addr -= 0x1000;
 		if ((0x2000 <= addr) && (addr < 0x2f00)) {
@@ -27,7 +28,48 @@ int mem_write_ppu(uint16_t addr, uint8_t value) {
 			memoryPPU[addr + 0x1000] = value;
 		} else {
 			memoryPPU[addr] = value;
+		}*/
+		if ((0x3000 <= addr) && (addr < 0x3f00))
+			addr -= 0x1000;
+
+		if ((0x2000 <= addr) && (addr < 0x2400)) {
+			// L1
+			if (get_mirroring()) {
+				memoryPPU[addr] = value;
+				memoryPPU[addr+0x400] = value;
+			} else {
+				memoryPPU[addr] = value;
+				memoryPPU[addr+0x800] = value;
+			}
+		} else if ((0x2400 <= addr) && (addr < 0x2800)) {
+			// L2
+			if (get_mirroring()) {
+				memoryPPU[addr] = value;
+				memoryPPU[addr-0x400] = value;
+			} else {
+				memoryPPU[addr] = value;
+				memoryPPU[addr+0x800] = value;
+			}
+		} else if ((0x2800 <= addr) && (addr < 0x2c00)) {
+			// L3
+			if (get_mirroring()) {
+				memoryPPU[addr] = value;
+				memoryPPU[addr+0x400] = value;
+			} else {
+				memoryPPU[addr] = value;
+				memoryPPU[addr-0x800] = value;
+			}
+		} else {
+			// L4
+			if (get_mirroring()) {
+				memoryPPU[addr] = value;
+				memoryPPU[addr-0x400] = value;
+			} else {
+				memoryPPU[addr] = value;
+				memoryPPU[addr-0x800] = value;
+			}
 		}
+
 	} else {
 		// Palettes
 		uint16_t offset;
