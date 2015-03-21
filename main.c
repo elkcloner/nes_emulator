@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
 			cycleCount +=  cpu_exec();
 		}
 
-		printf("ppu entered\n");
+//		printf("ppu entered\n");
 		ppu_run(cycleCount);
 
 		if (display_events())

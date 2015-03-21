@@ -22,7 +22,7 @@ int load_rom(char *filename) {
 	for (i = 0; i < NES_HEADER_SIZE; i++)
 		fscanf(fp, "%*c");
 	// Read first PRG-ROM bank into cpu memory
-	/*for (addr = 0x8000; addr < 0x8000 + PRG_ROM_SIZE; addr++) {
+/*	for (addr = 0x8000; addr < 0x8000 + PRG_ROM_SIZE; addr++) {
 		fscanf(fp, "%c", &buf);
 		mem_write_cpu(addr, buf);
 	}*/
