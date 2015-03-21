@@ -37,14 +37,14 @@ int main(int argc, char **argv) {
 			cycleCount +=  cpu_exec();
 		}
 
-		//printf("ppu entered\n");
+		printf("ppu entered\n");
 		ppu_run(cycleCount);
 
 		if (display_events())
 			break;
 	}
 
-	int i,j;
+//	int i,j;
 /*	printf("Pattern Table 1:\n");
 	for (i = 0; i < 0x1000; i+=16) {
 		printf("0x%02x\n\tLow :", i/16);
@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
 		}
 		printf("\n");
 	}*/
-	printf("\n");
+/*	printf("\n");
 	printf("Attribute Table:\n");
 	for (i = 0; i < 8; i++) {
 		for (j = 0; j < 8; j++)
@@ -75,6 +75,10 @@ int main(int argc, char **argv) {
 	for (i = 0; i < 0x10; i++)
 		printf("%02x ",mem_read_ppu(0x3f00 + i));
 	printf("\n");
+
+	for (i = 0xf1c0; i < 0xf3c0; i++)
+		printf("%02x ", mem_read_cpu(i));
+*/
 
 	exit(EXIT_SUCCESS);
 }
