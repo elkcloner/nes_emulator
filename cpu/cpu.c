@@ -2,8 +2,8 @@
 #include <stdbool.h>
 #include "cpu.h"
 #include "instructions.h"
-#include "cpu_memory.h"
 #include "../misc/debug.h"
+#include "../memory/memory.h"
 
 #define NUM_OPCODES	0x100
 

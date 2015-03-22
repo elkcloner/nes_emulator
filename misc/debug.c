@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "../cpu/cpu.h"
-#include "../cpu/cpu_memory.h"
+#include "../memory/memory.h"
 
 int print_debug() {
 	printf("%04X\t%02X\t\tA:%02X X:%02X Y:%02X P:%02X SP:%02X\n",
@@ -18,7 +18,7 @@ int print_registers() {
 	return 0;
 }
 
-int print_memory() {
+/*int print_memory() {
 	int i = 0;
 	int addr;
 
@@ -36,4 +36,4 @@ int print_memory() {
 	}
 
 	return 0;
-}
+}*/

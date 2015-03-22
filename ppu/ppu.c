@@ -1,10 +1,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "ppu.h"
-#include "ppu_memory.h"
 #include "../cpu/cpu.h"
-#include "../cpu/cpu_memory.h"
 #include "../misc/display.h"
+#include "../memory/memory.h"
 
 typedef struct {
 	uint8_t controller;		// $2000
@@ -94,11 +93,11 @@ int ppu_run(int cycles) {
 			// update OAMADDR
 			// update OAMDATA
 			registers.oamAddress = mem_read_cpu(0x2003);
-			registers.oamData = read_sprite_mem(registers.oamAddress);
+			registers.oamData = mem_read_oam(registers.oamAddress);
 			break;
 		case WRITE_2004:
 			// write OAMdata to addr OAMaddr, increment OAMAddr
-			write_sprite_mem(registers.oamAddress, mem_read_cpu(0x2004));
+			mem_write_oam(registers.oamAddress, mem_read_cpu(0x2004));
 			break;
 		case READ_2004:
 			// nothing	
@@ -649,7 +648,7 @@ int update_memory() {
 	mem_write_cpu(0x2001, registers.mask);	
 	mem_write_cpu(0x2002, registers.status);	
 	mem_write_cpu(0x2003, registers.oamAddress);	
-	mem_write_cpu(0x2004, read_sprite_mem(registers.oamAddress));	
+	mem_write_cpu(0x2004, mem_read_oam(registers.oamAddress));	
 	mem_write_cpu(0x2005, registers.scroll);	
 	mem_write_cpu(0x2006, registers.address);	
 	mem_write_cpu(0x2007, registers.data);	

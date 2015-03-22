@@ -1,12 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "cpu/cpu.h"
-#include "cpu/cpu_memory.h"
 #include "ppu/ppu.h"
-#include "ppu/ppu_memory.h"
-#include "misc/loader.h"
 #include "misc/debug.h"
 #include "misc/display.h"
+#include "memory/memory.h"
 
 #define CYCLES_PER_FRAME	29871
 
@@ -37,15 +35,15 @@ int main(int argc, char **argv) {
 			cycleCount +=  cpu_exec();
 		}
 
-//		printf("ppu entered\n");
+	//	printf("ppu entered\n");
 		ppu_run(cycleCount);
 
 		if (display_events())
 			break;
 	}
 
-//	int i,j;
-/*	printf("Pattern Table 1:\n");
+	int i,j;
+	printf("Pattern Table 1:\n");
 	for (i = 0; i < 0x1000; i+=16) {
 		printf("0x%02x\n\tLow :", i/16);
 		for (j = 0; j < 8; j++)
@@ -62,8 +60,8 @@ int main(int argc, char **argv) {
 			printf("%02x ", mem_read_ppu(0x2000+i*32+j));
 		}
 		printf("\n");
-	}*/
-/*	printf("\n");
+	}
+	printf("\n");
 	printf("Attribute Table:\n");
 	for (i = 0; i < 8; i++) {
 		for (j = 0; j < 8; j++)
@@ -76,9 +74,8 @@ int main(int argc, char **argv) {
 		printf("%02x ",mem_read_ppu(0x3f00 + i));
 	printf("\n");
 
-	for (i = 0xf1c0; i < 0xf3c0; i++)
-		printf("%02x ", mem_read_cpu(i));
-*/
+	//for (i = 0; i < 0x400; i++)
+	//	printf("%02x ", mem_read_cpu(0x8e19 + i));
 
 	exit(EXIT_SUCCESS);
 }

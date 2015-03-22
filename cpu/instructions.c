@@ -1,6 +1,6 @@
 #include "instructions.h"
 #include "cpu.h"
-#include "cpu_memory.h"
+#include "../memory/memory.h"
 
 int asm_adc(uint16_t addr) {
 	uint16_t op1 = get_a();
