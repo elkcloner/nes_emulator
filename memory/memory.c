@@ -2,12 +2,13 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "memory.h"
+#include "../misc/display.h"
 
 #define HEADER_SIZE		0x10
 #define TRAINER_SIZE	0x200
 #define PRG_BANK_SIZE	0x4000
 #define CHR_BANK_SIZE	0x2000
-#define MAX_NUM_PRG		4
+#define MAX_NUM_PRG		16	
 #define MAX_NUM_CHR		4
 #define SRAM_SIZE		0x2000
 #define EXPAC_ROM_SIZE	0x1fe0
@@ -39,7 +40,7 @@ static uint8_t nameTables[MAX_NUM_NT][N_TABLE_SIZE];
 static uint8_t oam[OAM_SIZE];
 
 static uint8_t mapper;
-static int numPRG, numCHR;
+static uint8_t numPRG, numCHR;
 //static int numPRGRAM;
 static bool verticalMirroring;
 //static bool batterySRAM;
@@ -89,6 +90,9 @@ int mem_write_cpu(uint16_t address, uint8_t value) {
 		expansionROM[address-0x4020] = value;
 	} else if (0x4000 <= address) {
 		// PPA and I/O register
+		if (address == 0x4016) {
+			controller_write(value);
+		}
 		ppaRegs[address-0x4000] = value;		
 	} else if (0x2008 <= address) {
 		// Mirror into 0x2000-0x2007
@@ -135,6 +139,9 @@ uint8_t mem_read_cpu(uint16_t address) {
 		return expansionROM[address-0x4020];
 	} else if (0x4000 <= address) {
 		// PPA and I/O register
+		if (address == 0x4016) {
+			return ppaRegs[0x16] = controller_read(address);
+		}
 		return ppaRegs[address-0x4000];		
 	} else if (0x2008 <= address) {
 		// Mirror into 0x2000-0x2007
@@ -267,7 +274,7 @@ int load_rom(char *filename) {
 	mapper = header[6] >> 4;
 	mapper |= 0xf0 & header[7];
 
-	numPRG= header[4];
+	numPRG = header[4];
 	numCHR = header[5];
 
 	if (0x01 & header[6]) {

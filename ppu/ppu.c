@@ -30,7 +30,7 @@ static uint8_t addrLatchStatus = 0;
 // TODO this is an ugly fix
 static uint8_t hasRead = 0;
 
-static char pixels[256*240*3];
+static char pixels[256*240*3*9];
 
 int ppu_run(int cycles) {
 	int counter = cycles*3;
@@ -244,7 +244,7 @@ int render_frame() {
 	}
 
 	// convert frame data into pixels for sdl
-	for (i = 0; i < 240; i++) {
+/*	for (i = 0; i < 240; i++) {
 		for (j = 0; j < 256; j++) {
 			switch (frame[i][j]) {
 				case 0x00:
@@ -633,6 +633,409 @@ int render_frame() {
 					pixels[(i*256+j)*3+2] = 0x00;
 					break;
 			}
+
+		}
+	}*/
+
+	uint8_t red = 0;
+	uint8_t green = 0;
+	uint8_t blue = 0;
+	for (rowCount = 0; rowCount < 240; rowCount++) {
+	for (colCount = 0; colCount < 256; colCount++) {
+			switch (frame[rowCount][colCount]) {
+				case 0x00:
+					red = 0x75;
+					green = 0x75;
+					blue = 0x75;
+					break;
+				case 0x01:
+					red = 0x27;
+					green = 0x1b;
+					blue = 0x8f;
+					break;
+				case 0x02:
+					red = 0x00;
+					green = 0x00;
+					blue = 0xab;
+					break;
+				case 0x03:
+					red = 0x47;
+					green = 0x00;
+					blue = 0x9f;
+					break;
+				case 0x04:
+					red = 0x8f;
+					green = 0x00;
+					blue = 0x77;
+					break;
+				case 0x05:
+					red = 0xab;
+					green = 0x00;
+					blue = 0x13;
+					break;
+				case 0x06:
+					red = 0xa7;
+					green = 0x00;
+					blue = 0x00;
+					break;
+				case 0x07:
+					red = 0x7f;
+					green = 0x0b;
+					blue = 0x00;
+					break;
+				case 0x08:
+					red = 0x43;
+					green = 0x2f;
+					blue = 0x00;
+					break;
+				case 0x09:
+					red = 0x00;
+					green = 0x47;
+					blue = 0x00;
+					break;
+				case 0x0a:
+					red = 0x00;
+					green = 0x51;
+					blue = 0x00;
+					break;
+				case 0x0b:
+					red = 0x00;
+					green = 0x3f;
+					blue = 0x17;
+					break;
+				case 0x0c:
+					red = 0x1b;
+					green = 0x3f;
+					blue = 0x5f;
+					break;
+				case 0x0d:
+					red = 0x00;
+					green = 0x00;
+					blue = 0x00;
+					break;
+				case 0x0e:
+					red = 0x00;
+					green = 0x00;
+					blue = 0x00;
+					break;
+				case 0x0f:
+					red = 0x00;
+					green = 0x00;
+					blue = 0x00;
+					break;
+				case 0x10:
+					red = 0xbc;
+					green = 0xbc;
+					blue = 0xbc;
+					break;
+				case 0x11:
+					red = 0x00;
+					green = 0x73;
+					blue = 0xef;
+					break;
+				case 0x12:
+					red = 0x23;
+					green = 0x3b;
+					blue = 0xef;
+					break;
+				case 0x13:
+					red = 0x83;
+					green = 0x00;
+					blue = 0xf3;
+					break;
+				case 0x14:
+					red = 0xbf;
+					green = 0x00;
+					blue = 0xbf;
+					break;
+				case 0x15:
+					red = 0xe7;
+					green = 0x00;
+					blue = 0x5b;
+					break;
+				case 0x16:
+					red = 0xdb;
+					green = 0x2b;
+					blue = 0x00;
+					break;
+				case 0x17:
+					red = 0xcb;
+					green = 0x4f;
+					blue = 0x0f;
+					break;
+				case 0x18:
+					red = 0x8b;
+					green = 0x73;
+					blue = 0x00;
+					break;
+				case 0x19:
+					red = 0x00;
+					green = 0x97;
+					blue = 0x00;
+					break;
+				case 0x1a:
+					red = 0x00;
+					green = 0xab;
+					blue = 0x00;
+					break;
+				case 0x1b:
+					red = 0x00;
+					green = 0x93;
+					blue = 0x3b;
+					break;
+				case 0x1c:
+					red = 0x00;
+					green = 0x83;
+					blue = 0x8b;
+					break;
+				case 0x1d:
+					red = 0x00;
+					green = 0x00;
+					blue = 0x00;
+					break;
+				case 0x1e:
+					red = 0x00;
+					green = 0x00;
+					blue = 0x00;
+					break;
+				case 0x1f:
+					red = 0x00;
+					green = 0x00;
+					blue = 0x00;
+					break;
+				case 0x20:
+					red = 0xff;
+					green = 0xff;
+					blue = 0xff;
+					break;
+				case 0x21:
+					red = 0x3f;
+					green = 0xbf;
+					blue = 0xff;
+					break;
+				case 0x22:
+					red = 0x5f;
+					green = 0x97;
+					blue = 0xff;
+					break;
+				case 0x23:
+					red = 0xa7;
+					green = 0x8b;
+					blue = 0xfd;
+					break;
+				case 0x24:
+					red = 0xf7;
+					green = 0x7b;
+					blue = 0xff;
+					break;
+				case 0x25:
+					red = 0xff;
+					green = 0x77;
+					blue = 0xb7;
+					break;
+				case 0x26:
+					red = 0xff;
+					green = 0x77;
+					blue = 0x63;
+					break;
+				case 0x27:
+					red = 0xff;
+					green = 0x9b;
+					blue = 0x3b;
+					break;
+				case 0x28:
+					red = 0xf3;
+					green = 0xbf;
+					blue = 0x3f;
+					break;
+				case 0x29:
+					red = 0x83;
+					green = 0xd3;
+					blue = 0x13;
+					break;
+				case 0x2a:
+					red = 0x4f;
+					green = 0xdf;
+					blue = 0x4b;
+					break;
+				case 0x2b:
+					red = 0x58;
+					green = 0xf8;
+					blue = 0x98;
+					break;
+				case 0x2c:
+					red = 0x00;
+					green = 0xeb;
+					blue = 0xdb;
+					break;
+				case 0x2d:
+					red = 0x00;
+					green = 0x00;
+					blue = 0x00;
+					break;
+				case 0x2e:
+					red = 0x00;
+					green = 0x00;
+					blue = 0x00;
+					break;
+				case 0x2f:
+					red = 0x00;
+					green = 0x00;
+					blue = 0x00;
+					break;
+				case 0x30:
+					red = 0xff;
+					green = 0xff;
+					blue = 0xff;
+					break;
+				case 0x31:
+					red = 0xab;
+					green = 0xe7;
+					blue = 0xff;
+					break;
+				case 0x32:
+					red = 0xc7;
+					green = 0xd7;
+					blue = 0xff;
+					break;
+				case 0x33:
+					red = 0xd7;
+					green = 0xcb;
+					blue = 0xff;
+					break;
+				case 0x34:
+					red = 0xff;
+					green = 0xc7;
+					blue = 0xff;
+					break;
+				case 0x35:
+					red = 0xff;
+					green = 0xc7;
+					blue = 0xdb;
+					break;
+				case 0x36:
+					red = 0xff;
+					green = 0xbf;
+					blue = 0xb3;
+					break;
+				case 0x37:
+					red = 0xff;
+					green = 0xdb;
+					blue = 0xab;
+					break;
+				case 0x38:
+					red = 0xff;
+					green = 0xe7;
+					blue = 0xa3;
+					break;
+				case 0x39:
+					red = 0xe3;
+					green = 0xff;
+					blue = 0xa3;
+					break;
+				case 0x3a:
+					red = 0xab;
+					green = 0xf3;
+					blue = 0xbf;
+					break;
+				case 0x3b:
+					red = 0xb3;
+					green = 0xff;
+					blue = 0xcf;
+					break;
+				case 0x3c:
+					red = 0x9f;
+					green = 0xff;
+					blue = 0xf3;
+					break;
+				case 0x3d:
+					red = 0x00;
+					green = 0x00;
+					blue = 0x00;
+					break;
+				case 0x3e:
+					red = 0x00;
+					green = 0x00;
+					blue = 0x00;
+					break;
+				case 0x3f:
+					red = 0x00;
+					green = 0x00;
+					blue = 0x00;
+					break;
+				case 0x40:
+					red = 0x00;
+					green = 0x00;
+					blue = 0x00;
+					break;
+				case 0x41:
+					red = 0x00;
+					green = 0x00;
+					blue = 0x00;
+					break;
+				case 0x42:
+					red = 0x00;
+					green = 0x00;
+					blue = 0x00;
+					break;
+				case 0x43:
+					red = 0x00;
+					green = 0x00;
+					blue = 0x00;
+					break;
+				case 0x44:
+					red = 0x00;
+					green = 0x00;
+					blue = 0x00;
+					break;
+				case 0x45:
+					red = 0x00;
+					green = 0x00;
+					blue = 0x00;
+					break;
+				case 0x46:
+					red = 0x00;
+					green = 0x00;
+					blue = 0x00;
+					break;
+				case 0x47:
+					red = 0x00;
+					green = 0x00;
+					blue = 0x00;
+					break;
+				case 0x48:
+					red = 0x00;
+					green = 0x00;
+					blue = 0x00;
+					break;
+				case 0x49:
+					red = 0x00;
+					green = 0x00;
+					blue = 0x00;
+					break;
+				case 0x4a:
+					red = 0x00;
+					green = 0x00;
+					blue = 0x00;
+					break;
+				case 0x4b:
+					red = 0x00;
+					green = 0x00;
+					blue = 0x00;
+					break;
+				case 0x4c:
+					red = 0x00;
+					green = 0x00;
+					blue = 0x00;
+					break;
+			}
+
+		for (i = 0; i < 3; i++)
+		for (j = 0; j < 3; j++)	{
+			pixels[((rowCount*3+i)*256*9)+(colCount*3+j)*3+0] = red;
+			pixels[((rowCount*3+i)*256*9)+(colCount*3+j)*3+1] = green;
+			pixels[((rowCount*3+i)*256*9)+(colCount*3+j)*3+2] = blue;
+		}
 
 		}
 	}
