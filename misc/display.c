@@ -5,7 +5,7 @@
 
 static SDL_Surface *screen = NULL;
 
-static uint8_t lastWrite;
+static uint8_t lastWrite = 0;
 static int numReads = 0;
 
 static bool a_state = false;
@@ -35,14 +35,13 @@ int display_events() {
 			return 1;	
 		} else if (event.type == SDL_KEYDOWN) {
 			switch (event.key.keysym.sym) {
-				case SDLK_a:
+				case SDLK_x:
 					a_state = true;
 					break;
-				case SDLK_b:
+				case SDLK_z:
 					b_state = true;
 					break;
 				case SDLK_RSHIFT:
-					select_state = true;
 				case SDLK_LSHIFT:
 					select_state = true;
 					break;
@@ -76,7 +75,6 @@ int display_events() {
 					b_state = false;
 					break;
 				case SDLK_RSHIFT:
-					select_state = false;
 				case SDLK_LSHIFT:
 					select_state = false;
 					break;

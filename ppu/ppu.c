@@ -44,7 +44,7 @@ int ppu_run(int cycles) {
 			}
 		}	
 
-		// 0,240 render the entire frame based off NT0
+		// 0,240 render the entire frame
 		if ((scanLine == 240) && (scanCycle == 1))
 			render_frame();
 
@@ -71,10 +71,12 @@ int ppu_run(int cycles) {
 		case WRITE_2000:
 			// update PPUCTRL value
 			registers.controller = mem_read_cpu(0x2000);	
+			registers.status = (registers.status & 0xf0) | (mem_read_cpu(0x2000) & 0x0f);
 			break;
 		case WRITE_2001:
 			// update PPUMASK value
 			registers.mask = mem_read_cpu(0x2001);
+			registers.status = (registers.status & 0xf0) | (mem_read_cpu(0x2001) & 0x0f);
 			break;
 		case READ_2002:
 			// clear PPUSTATUS bit 7
@@ -94,21 +96,26 @@ int ppu_run(int cycles) {
 			// update OAMDATA
 			registers.oamAddress = mem_read_cpu(0x2003);
 			registers.oamData = mem_read_oam(registers.oamAddress);
+			registers.status = (registers.status & 0xf0) | (mem_read_cpu(0x2003) & 0x0f);
 			break;
 		case WRITE_2004:
 			// write OAMdata to addr OAMaddr, increment OAMAddr
 			mem_write_oam(registers.oamAddress, mem_read_cpu(0x2004));
+			registers.status = (registers.status & 0xf0) | (mem_read_cpu(0x2004) & 0x0f);
 			break;
 		case READ_2004:
 			// nothing	
 			break;
 		case WRITE_2005:
 			// write twice for PPUSCROLL addr latch
-			if (scrollLatchStatus == 1)
+			if (scrollLatchStatus == 0) {
 				ppuScrollX = mem_read_cpu(0x2005);
-			else
+				scrollLatchStatus = 1;
+			} else {
 				ppuScrollY = mem_read_cpu(0x2005);
-			scrollLatchStatus++;
+				scrollLatchStatus = 0;
+			}
+			registers.status = (registers.status & 0xf0) | (mem_read_cpu(0x2005) & 0x0f);
 			break;
 		case WRITE_2006:
 			// write twice for PPUADDR latch
@@ -119,6 +126,7 @@ int ppu_run(int cycles) {
 				ppuAddrLatch = ppuAddrLatch | ((uint16_t)mem_read_cpu(0x2006));
 				addrLatchStatus = 0;
 			}
+			registers.status = (registers.status & 0xf0) | (mem_read_cpu(0x2006) & 0x0f);
 			break;
 		case WRITE_2007:
 			// write to VRAM at addr latch
@@ -128,6 +136,7 @@ int ppu_run(int cycles) {
 				ppuAddrLatch += 0x20;
 			else
 				ppuAddrLatch += 0x1;
+			registers.status = (registers.status & 0xf0) | (mem_read_cpu(0x2007) & 0x0f);
 			break;
 		case READ_2007:
 			// update to contain data at ppuaddr

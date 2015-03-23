@@ -12,8 +12,8 @@
 #define MAX_NUM_CHR		4
 #define SRAM_SIZE		0x2000
 #define EXPAC_ROM_SIZE	0x1fe0
-#define PPU_REG_SIZE	0x20
-#define PPA_REG_SIZE	0x08
+#define PPU_REG_SIZE	0x08
+#define PPA_REG_SIZE	0x20
 #define RAM_SIZE		0x800
 #define PAL_RAM_SIZE	0x20
 #define MAX_NUM_NT		2
@@ -49,31 +49,32 @@ static bool trainerPresent;
 
 int mem_write_cpu(uint16_t address, uint8_t value) {
 	// TODO ppu status change mirroring support
-	switch (address) {
-		case 0x2000:
-			set_ppu_changed(WRITE_2000);
-			break;
-		case 0x2001:
-			set_ppu_changed(WRITE_2001);
-			break;
-		case 0x2003:
-			set_ppu_changed(WRITE_2003);
-			break;
-		case 0x2004:
-			set_ppu_changed(WRITE_2004);
-			break;
-		case 0x2005:
-			set_ppu_changed(WRITE_2005);
-			break;
-		case 0x2006:
-			set_ppu_changed(WRITE_2006);
-			break;
-		case 0x2007:
-			set_ppu_changed(WRITE_2007);
-			break;
-		case 0x4014:
-			set_ppu_changed(WRITE_4014);
-			break;
+	if ((0x2000 <= address) && (address < 0x4000)) {
+		switch (address%8) {
+			case 0x0:
+				set_ppu_changed(WRITE_2000);
+				break;
+			case 0x1:
+				set_ppu_changed(WRITE_2001);
+				break;
+			case 0x3:
+				set_ppu_changed(WRITE_2003);
+				break;
+			case 0x4:
+				set_ppu_changed(WRITE_2004);
+				break;
+			case 0x5:
+				set_ppu_changed(WRITE_2005);
+				break;
+			case 0x6:
+				set_ppu_changed(WRITE_2006);
+				break;
+			case 0x7:
+				set_ppu_changed(WRITE_2007);
+				break;
+		}
+	} else if (address == 0x4014) {
+		set_ppu_changed(WRITE_4014);
 	}
 
 	if (0xc000 <= address) {
@@ -96,7 +97,7 @@ int mem_write_cpu(uint16_t address, uint8_t value) {
 		ppaRegs[address-0x4000] = value;		
 	} else if (0x2008 <= address) {
 		// Mirror into 0x2000-0x2007
-		ppuRegs[address%8] = value;
+		ppuRegs[address%0x8] = value;
 	} else if (0x2000 <= address) {
 		// PPU registers
 		ppuRegs[address-0x2000] = value;
@@ -113,16 +114,18 @@ int mem_write_cpu(uint16_t address, uint8_t value) {
 
 uint8_t mem_read_cpu(uint16_t address) {
 	// TODO mirroring in status change
-	switch (address) {
-		case 0x2002:
-			set_ppu_changed(READ_2002);
-			break;
-		case 0x2004:
-			set_ppu_changed(READ_2004);
-			break;
-		case 0x2007:
-			set_ppu_changed(READ_2007);
-			break;
+	if ((0x2000 <= address) && (address < 0x4000)) {
+		switch (address%8) {
+			case 0x2:
+				set_ppu_changed(READ_2002);
+				break;
+			case 0x4:
+				set_ppu_changed(READ_2004);
+				break;
+			case 0x7:
+				set_ppu_changed(READ_2007);
+				break;
+		}
 	}
 
 	if (0xc000 <= address) {
@@ -140,12 +143,14 @@ uint8_t mem_read_cpu(uint16_t address) {
 	} else if (0x4000 <= address) {
 		// PPA and I/O register
 		if (address == 0x4016) {
-			return ppaRegs[0x16] = controller_read(address);
+			return ppaRegs[0x16] = controller_read();
+		} else if (address == 0x4017) {
+			return 0;
 		}
 		return ppaRegs[address-0x4000];		
 	} else if (0x2008 <= address) {
 		// Mirror into 0x2000-0x2007
-		return ppuRegs[address%8];
+		return ppuRegs[address%0x8];
 	} else if (0x2000 <= address) {
 		// PPU registers
 		return ppuRegs[address-0x2000];

@@ -176,20 +176,21 @@ int asm_brk(uint16_t addr) {
 	uint8_t pcHigh = pc >> 8;
 	uint8_t pcLow = pc;
 
-	if (!get_iFlag()) {
+// TODO reenable this?
+//	if (!get_iFlag()) {
 		// Push PC
 		mem_write_cpu((0x100 | (uint16_t) get_sp()), pcHigh);
 		set_sp(get_sp()-1);
 		mem_write_cpu((0x100 | (uint16_t) get_sp()), pcLow);
 		set_sp(get_sp()-1);
 		// Push status
-		mem_write_cpu((0x100 | (uint16_t) get_sp()), get_status());
+		mem_write_cpu((0x100 | (uint16_t) get_sp()), 0x30 | get_status());
 		set_sp(get_sp()-1);
 
 		set_iFlag();
 
 		cpu_interrupt(IRQ);
-	}
+//	}
 
 	return 0;
 }
@@ -826,7 +827,7 @@ int asm_pla(uint16_t addr) {
 }
 
 int asm_php(uint16_t addr) {
-	mem_write_cpu((0x100 | (uint16_t) get_sp()), 0x10 | get_status());
+	mem_write_cpu((0x100 | (uint16_t) get_sp()), 0x30 | get_status());
 	set_sp(get_sp()-1);
 
 	return 0;
